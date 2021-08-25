@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>浇水控制台</title>
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/index.css') }}">
+    <div id="container">
+        <div id="wsStatus" class="unconnected"><span>未连接到服务器</span></div>
+        <div id="terminalStatus" class="unconnected"><span>终端未连接到服务器</span></div>
+
+        <div id="sectionA">
+            <button id="autoWatering">预设自动浇水</button>
+            <button id="turnOnMotorLeft">启动电机左转</button>
+            <button id="turnOnMotorRight">启动电机右转</button>
+            <button id="turnMotorOff">关闭电机</button>
+            <button id="turnLEDOn">开启LED</button>
+            <button id="turnLEDOff">关闭LED</button>
+        </div>
+        <div id="sectionB">
+            <span class="statusStart">
+
+            </span>
+            <span class="statusWaiting">
+
+            </span>
+            <span class="statusSuccess">
+
+            </span>
+        </div>
+    </div>
+    <script src="{{ url_for('static',filename='js/jquery-3.6.0.min.js') }}"></script>
+    <script>
+        let socket = new WebSocket("ws://"+window.location.host+"/websocket")
+        // Connection opened
+        socket.addEventListener('open', function (event) {
+            $("#wsStatus").html("已连接到服务器").removeClass("unconnected").addClass("connected")
+            socket.send('user');
+            socket.send('terminal_status');
+        });
+        socket.addEventListener('close', function (event) {
+            $("#wsStatus").html("连接断开").removeClass("connected").addClass("unconnected")
+            $("#terminalStatus").html("-").removeClass("connected").addClass("unconnected")
+            {#socket.send('user');#}
+            socket = new WebSocket("ws://"+window.location.host+"/websocket")
+        });
+
+        // Listen for messages
+        socket.addEventListener('message', function (event) {
+            if(event.data==="terminal_online"){
+                $("#terminalStatus").html("终端在线").removeClass("unconnected").addClass("connected")
+            }
+            if(event.data==="terminal_offline"){
+                $("#terminalStatus").html("终端离线").removeClass("connected").addClass("unconnected")
+            }
+            if(event.data==="turn_led_on_done"){
+                $("#sectionB").html('<span class="statusSuccess">成功开启LED灯！</span>')
+            }
+            if(event.data==="turn_led_off_done"){
+                $("#sectionB").html('<span class="statusSuccess">成功关闭LED灯！</span>')
+            }
+            if(event.data==="auto_watering_done"){
+                $("#sectionB").html('<span class="statusSuccess">成功完成自动浇水！</span>')
+            }
+            if(event.data==="motor_right_done"){
+                $("#sectionB").html('<span class="statusSuccess">成功开启电机右转！</span>')
+            }
+            if(event.data==="motor_left_done"){
+                $("#sectionB").html('<span class="statusSuccess">成功开启电机左转！</span>')
+            }
+            if(event.data==="turn_motor_off_done"){
+                $("#sectionB").html('<span class="statusSuccess">成功关闭电机！</span>')
+            }
+            console.log('Message from server ', event.data);
+        });
+
+
+        $("#turnLEDOn").click(function (){
+            $("#sectionB").html('<span class="statusStart">发送指令：开启LED灯...</span>')
+            socket.send("turnLEDOn")
+        })
+        $("#turnLEDOff").click(function (){
+            $("#sectionB").html('<span class="statusStart">发送指令：关闭LED灯...</span>')
+            socket.send("turnLEDOff")
+        })
+        $("#autoWatering").click(function (){
+            $("#sectionB").html('<span class="statusStart">发送指令：开启预设浇水方案...</span>')
+            socket.send("autoWatering")
+        })
+        $("#turnOnMotorRight").click(function (){
+            $("#sectionB").html('<span class="statusStart">发送指令：开启电机右转...</span>')
+            socket.send("turnOnMotorRight")
+        })
+        $("#turnOnMotorLeft").click(function (){
+            $("#sectionB").html('<span class="statusStart">发送指令：开启电机左转...</span>')
+            socket.send("turnOnMotorLeft")
+        })
+        $("#turnMotorOff").click(function (){
+            $("#sectionB").html('<span class="statusStart">发送指令：开启电机左转...</span>')
+            socket.send("turnMotorOff")
+        })
+    </script>
+</head>
+<body>
+
+</body>
+</html>
