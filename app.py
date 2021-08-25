@@ -4,6 +4,7 @@
 # version: v1.1.1
 from route.index import here_index
 from common.welcome import Welcome
+from common.properties import port,address
 from flask import Flask, render_template
 from tornado.wsgi import WSGIContainer
 from tornado.web import Application, FallbackHandler
@@ -25,6 +26,6 @@ if __name__ == "__main__":
         (r'/websocket', WebSocket),
         (r'.*', FallbackHandler, dict(fallback=container))
     ])
-    server.listen(8080, address="0.0.0.0")
+    server.listen(port, address=address)
     Welcome()
     IOLoop.instance().start()

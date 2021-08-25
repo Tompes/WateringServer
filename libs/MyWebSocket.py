@@ -29,12 +29,7 @@ class WebSocket(WebSocketHandler):
             self.set_nodelay(True)
         except:
             pass
-        for i in WebSocket.pool.copy():  # 移除死亡Client
-            try:
-                i.ping()
-            except:
-                print("REMOVE")
-                WebSocket.pool.remove(i)
+        self.clean_dead()
         WebSocket.pool.add(self)
 
         print("Socket opened. now:" + str(len(WebSocket.pool)))
@@ -44,8 +39,8 @@ class WebSocket(WebSocketHandler):
             for i in WebSocket.pool:
                 if i.name == 'user':
                     i.write_message('terminal_offline')
-
         WebSocket.pool.remove(self)
+        self.clean_dead()
         print("Socket closed. now:" + str(len(WebSocket.pool)))
 
     def on_ping(self, data: bytes) -> None:
@@ -55,6 +50,7 @@ class WebSocket(WebSocketHandler):
         print("pong:" + self.name)
 
     def on_message(self, message):
+        self.clean_dead()
 
         self.write_message("Received: " + message)
         if self.name == 'terminal':
@@ -101,5 +97,14 @@ class WebSocket(WebSocketHandler):
         if message == 'turnMotorOff':
             for i in WebSocket.pool:
                 i.write_message('turn_motor_off')
+
+    def clean_dead(self):
+        print("Clean dead connections...")
+        for i in WebSocket.pool.copy():  # 移除死亡Client
+            try:
+                i.ping()
+            except:
+                print("REMOVE")
+                WebSocket.pool.remove(i)
     # def getOnline(self):
     #     return self.pool;

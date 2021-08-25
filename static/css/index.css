@@ -5,11 +5,11 @@
 #container{
     text-align: center;
     width: 375px;
-    height: 812px;
+    height: 692px;
     background: #f1f1f1;
     border: 1px solid #cdcbcb;
     border-radius: 15px;
-    margin: 0 auto 0 auto;
+    margin: 20px auto 0 auto;
 }
 #wsStatus{
     text-align: center;
